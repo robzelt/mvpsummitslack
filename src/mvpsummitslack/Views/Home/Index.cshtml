@@ -1,0 +1,48 @@
+﻿@model Signup
+@{
+    ViewData["Title"] = "MVP Global Summit Slack Team Signup";
+}
+
+<div class="row header-body center-block">
+    <div class="col-md-offset-3 col-md-6">
+        <div class="heading  wow fadeInUp  animated" data-wow-offset="120" data-wow-duration="1.5s" style="visibility: visible; animation-duration: 1.5s; animation-name: fadeInUp;">
+            <h1><span class="fa fa-slack"></span> <b>JOIN THE <i>UNOFFICIAL</i> SLACK FOR THE 2016 MVP GLOBAL SUMMIT</b></h1>
+        </div>
+        <form id="invite-form" asp-action="Index" asp-controller="Home" method="post" class="xform-horizontal">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Email" class="sr-only control-label"></label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email address">
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="FirstName" class="sr-only control-label"></label>
+                <input asp-for="FirstName" class="form-control" placeholder="Enter your first name">
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastName" class="sr-only control-label"></label>
+                <input asp-for="LastName" class="form-control" placeholder="Enter your last name">
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ProfileLink" class="sr-only control-label"></label>
+                <input asp-for="ProfileLink" class="form-control" placeholder="Enter the URL to your public MVP profile">
+                <span asp-validation-for="ProfileLink" class="text-danger"></span>
+            </div>
+
+            <h4>
+                <b>Remember, this is a private 3rd party channel. It’s not an official Microsoft or MVP Award sponsored/managed channel. All context and content need to be non-NDA.</b>
+            </h4>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Join the Slack Team</button>
+            <a href="https://mvpnov16.com/" class="btn btn-default btn-lg btn-block">Summit Registration</a>
+            <a href="https://www.mvp.microsoft.com/en-US/Summit" class="btn btn-default btn-lg btn-block">Summit Event Site</a>
+        </form>
+
+    </div>
+</div>
+
