@@ -15,7 +15,7 @@ namespace MVPSummitSlack.Models
 
         internal string ToSlackMessage()
         {
-            return $"\t*Email Verified:* {this.EmailVerified?.ToString() ?? "unknown"}\n\t*Name Verified:* {this.NameVerified}";
+            return $"\t\t*Name Verified:* {this.NameVerified}, *Email Verified:* {this.EmailVerified?.ToString() ?? "N/A"}";
         }
     }
 }

@@ -33,7 +33,7 @@ namespace MVPSummitSlack.Models
 
         internal string ToSlackMessage()
         {
-            return $"\t*Email:* {this.Email}\n\t*Name:* {this.FullName}\n\t*MVP Profile:* <{this.ProfileLink}>";
+            return $"{this.FullName} ({this.Email}).\n\t\t*MVP Profile:* <{this.ProfileLink}>";
         }
     }
 }

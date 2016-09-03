@@ -48,7 +48,7 @@ namespace MVPSummitSlack.Controllers
                                 Logger.Error($"Attempted to invite {model.Email} and received the following warnings: {(string)json["warning"]}.");
                             }
 
-                            var postData = $":white_check_mark: Invitation sent for\n{model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}";
+                            var postData = $":white_check_mark: Invitation sent for {model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}";
                             await SendSlackMessage(postData);
                             return View("Thanks");
                         }
@@ -60,7 +60,7 @@ namespace MVPSummitSlack.Controllers
                     }
                     else
                     {
-                        await SendSlackMessage($":x: Profile validation failed for\n{model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}");
+                        await SendSlackMessage($":x: Profile validation failed for {model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}");
                         Logger.Error($"Profile validation for {model.Email} failed; name didn't match.");
                         ModelState.AddModelError("", $"Profile validation failed; name didn't match.");
                     }
@@ -108,11 +108,13 @@ namespace MVPSummitSlack.Controllers
             {
                 using (var client = new HttpClient())
                 {
-                    Logger.Debug($"Sending '{message}' to the #invites channel.");
+                    var webhookUrl = $"https://hooks.slack.com/services/{_slackSettings.Webhook}";
+
+                    Logger.Debug($"Sending '{message}' to the #invites channel using {webhookUrl}.");
 
                     var postData = $@"{{ ""text"": ""{message}"" }}";
                     var content = new StringContent(postData, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync($"https://hooks.slack.com/services/{_slackSettings.Webhook}", content);
+                    var response = await client.PostAsync(webhookUrl, content);
                     response.EnsureSuccessStatusCode();
                 }
             }
@@ -163,7 +165,7 @@ namespace MVPSummitSlack.Controllers
 
                     // Try to verify that the name matches.
                     var title = divElements.Where(d => d.Attributes["class"].Value.Contains("profile")).SingleOrDefault()?.Descendants("div").FirstOrDefault()?.InnerText.Trim();
-                    validation.NameVerified = String.Compare(title, model.FullName, StringComparison.OrdinalIgnoreCase) == 0;
+                    validation.NameVerified = title.Contains(model.FullName);
                     bool? foundMatchingEmailAddress = null;
 
                     // Try to verify that the email address matches.
