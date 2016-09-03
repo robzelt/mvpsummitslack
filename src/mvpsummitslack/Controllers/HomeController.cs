@@ -36,22 +36,33 @@ namespace MVPSummitSlack.Controllers
             {
                 try
                 {
-                    var json = await SlackInvite(model);
-                    var ok = (bool)json["ok"];
-                    if (ok)
+                    var profileValidation = await ValidateProfile(model);
+                    if (profileValidation.NameVerified)
                     {
-                        if (!String.IsNullOrWhiteSpace((string)json["warning"]))
+                        var json = await SlackInvite(model);
+                        var ok = (bool)json["ok"];
+                        if (ok)
                         {
-                            Logger.Error($"Attempted to invite {model.Email} and received the following warnings: {(string)json["warning"]}.");
-                        }
+                            if (!String.IsNullOrWhiteSpace((string)json["warning"]))
+                            {
+                                Logger.Error($"Attempted to invite {model.Email} and received the following warnings: {(string)json["warning"]}.");
+                            }
 
-                        await SendSlackMessage(model);
-                        return View("Thanks");
+                            var postData = $":white_check_mark: Invitation sent for\n{model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}";
+                            await SendSlackMessage(postData);
+                            return View("Thanks");
+                        }
+                        else
+                        {
+                            Logger.Error($"Attempted to invite {model.Email} and received the following error: {(string)json["error"]}.");
+                            ModelState.AddModelError("", TranslateSlackError((string)json["error"]));
+                        }
                     }
                     else
                     {
-                        Logger.Error($"Attempted to invite {model.Email} and received the following error: {(string)json["error"]}.");
-                        ModelState.AddModelError("", TranslateSlackError((string)json["error"]));
+                        await SendSlackMessage($":x: Profile validation failed for\n{model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}");
+                        Logger.Error($"Profile validation for {model.Email} failed; name didn't match.");
+                        ModelState.AddModelError("", $"Profile validation failed; name didn't match.");
                     }
                 }
                 catch (Exception e)
@@ -91,27 +102,23 @@ namespace MVPSummitSlack.Controllers
             return text;
         }
 
-        private async Task SendSlackMessage(Signup model)
+        private async Task SendSlackMessage(string message)
         {
             try
             {
                 using (var client = new HttpClient())
                 {
-                    var postData = new JObject(new JProperty("text", $"Invitation sent for\n   *Email:* {model.Email}\n   *Name:* {model.FirstName} {model.LastName}\n   *MVP Profile:* <{model.ProfileLink}>"));
-                    var content = new StringContent(postData.ToString(), Encoding.UTF8, "application/json");
+                    Logger.Debug($"Sending '{message}' to the #invites channel.");
 
-                    if (Logger.IsDebugEnabled)
-                    {
-                        Logger.Debug($"Calling Slack invite API for {model.Email} with post data {postData.ToString()}.");
-                    }
-
+                    var postData = $@"{{ ""text"": ""{message}"" }}";
+                    var content = new StringContent(postData, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync($"https://hooks.slack.com/services/{_slackSettings.Webhook}", content);
                     response.EnsureSuccessStatusCode();
                 }
             }
             catch (Exception e)
             {
-                Logger.Error(e, $"Attempted to post message to the #invites channel for {model.Email} and received an error.");
+                Logger.Error(e, $"Attempted to send '{message}' to the #invites channel and received an error.");
             }
         }
 
@@ -138,6 +145,44 @@ namespace MVPSummitSlack.Controllers
                 var result = await response.Content.ReadAsStringAsync();
                 return JObject.Parse(result);
             }
+        }
+
+        private async Task<ProfileValidation> ValidateProfile(Signup model)
+        {
+            var validation = new ProfileValidation();
+
+            using (var client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromSeconds(5);
+                var result = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, model.ProfileLink));
+                if (result.IsSuccessStatusCode && !result.RequestMessage.RequestUri.AbsoluteUri.Contains("MvpSearch"))
+                {
+                    var doc = new HtmlAgilityPack.HtmlDocument();
+                    doc.Load(await result.Content.ReadAsStreamAsync());
+                    var divElements = doc.DocumentNode.Descendants("div").Where(d => d.Attributes.Contains("class"));
+
+                    // Try to verify that the name matches.
+                    var title = divElements.Where(d => d.Attributes["class"].Value.Contains("profile")).SingleOrDefault()?.Descendants("div").FirstOrDefault()?.InnerText.Trim();
+                    validation.NameVerified = String.Compare(title, model.FullName, StringComparison.OrdinalIgnoreCase) == 0;
+                    bool? foundMatchingEmailAddress = null;
+
+                    // Try to verify that the email address matches.
+                    foreach(var emailAddressElement in divElements.Where(d => d.Attributes["class"].Value.Contains("otherPanel")).SingleOrDefault()?.Descendants("a").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains("mail")))
+                    {
+                        if (String.Compare(emailAddressElement.InnerText.Trim(), model.Email) == 0)
+                        {
+                            foundMatchingEmailAddress = true;
+                            break;
+                        }
+
+                        foundMatchingEmailAddress = false;
+                    }
+
+                    validation.EmailVerified = foundMatchingEmailAddress;
+                }
+            }
+
+            return validation;
         }
 
         public async Task<IActionResult> ValidateProfileLink(string profileLink)
