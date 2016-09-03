@@ -79,6 +79,10 @@ namespace MVPSummitSlack.Controllers
                     text = "It looks like you're already in the team.";
                     break;
 
+                case "already_invited":
+                    text = "It looks like you've already been invited.";
+                    break;
+
                 default:
                     text = "An error occurred while trying to send the request. Please try again.";
                     break;
