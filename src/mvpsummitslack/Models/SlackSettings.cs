@@ -9,5 +9,7 @@ namespace MVPSummitSlack.Models
     {
         public string Token { get; set; }
 
+        public string Webhook { get; set; }
+
     }
 }

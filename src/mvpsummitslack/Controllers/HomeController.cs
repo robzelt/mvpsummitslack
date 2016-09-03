@@ -101,7 +101,7 @@ namespace MVPSummitSlack.Controllers
                         Logger.Debug($"Calling Slack invite API for {model.Email} with post data {postData.ToString()}.");
                     }
 
-                    var response = await client.PostAsync($"https://hooks.slack.com/services/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", content);
+                    var response = await client.PostAsync($"https://hooks.slack.com/services/{_slackSettings.Webhook}", content);
                     response.EnsureSuccessStatusCode();
                 }
             }
