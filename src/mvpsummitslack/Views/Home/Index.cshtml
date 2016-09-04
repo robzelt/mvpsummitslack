@@ -8,7 +8,7 @@
         <div class="heading  wow fadeInUp  animated" data-wow-offset="120" data-wow-duration="1.5s" style="visibility: visible; animation-duration: 1.5s; animation-name: fadeInUp;">
             <h1><span class="fa fa-slack"></span> <b>JOIN THE <i>UNOFFICIAL</i> SLACK FOR THE 2016 MVP GLOBAL SUMMIT</b></h1>
         </div>
-        <form id="invite-form" asp-action="Index" asp-controller="Home" method="post" class="xform-horizontal">
+        <form id="invite-form" asp-action="Index" asp-controller="Home" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Email" class="sr-only control-label"></label>
@@ -51,10 +51,16 @@
                 </b>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Join the Slack Team</button>
-            <a href="https://mvpnov16.com/" class="btn btn-default btn-lg btn-block">Summit Registration</a>
-            <a href="https://www.mvp.microsoft.com/en-US/Summit" class="btn btn-default btn-lg btn-block">Summit Event Site</a>
-            <a href="https://mvpsummit.slack.com" class="btn btn-slack btn-lg btn-block"><span class="fa fa-slack"></span> Go to Slack</a>
+            <button type="submit" class="btn btn-primary btn-lg btn-block m-b-2">Join the Slack Team</button>
+            <a href="https://mvpsummit.slack.com" class="btn btn-slack btn-lg btn-block m-b-2"><span class="fa fa-slack"></span> Go to Slack</a>
+            <div class="row">
+                <div class="col-sm-6 m-b-2">
+                    <a href="https://mvpnov16.com/" class="btn btn-default btn-lg btn-block">Summit Registration</a>
+                </div>
+                <div class="col-sm-6 m-b-2">
+                    <a href="https://www.mvp.microsoft.com/en-US/Summit" class="btn btn-default btn-lg btn-block">Summit Event Site</a>
+                </div>
+            </div>
         </form>
     </div>
 </div>
