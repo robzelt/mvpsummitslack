@@ -165,7 +165,7 @@ namespace MVPSummitSlack.Controllers
                     var divElements = doc.DocumentNode.Descendants("div").Where(d => d.Attributes.Contains("class"));
 
                     // Try to verify that the name matches.
-                    var title = divElements.Where(d => d.Attributes["class"].Value.Contains("profile")).SingleOrDefault()?.Descendants("div").FirstOrDefault()?.InnerText.Trim();
+                    var title = WebUtility.HtmlDecode(divElements.Where(d => d.Attributes["class"].Value.Contains("profile")).SingleOrDefault()?.Descendants("div").FirstOrDefault()?.InnerText.Trim());
                     validation.NameFound = title;
                     validation.NameExpected = model.FullName;
                     validation.NameVerified = title.Contains(model.FullName);
