@@ -13,6 +13,10 @@ namespace MVPSummitSlack.Models
 
         public bool NameVerified { get; set; }
 
+        public string NameFound { get; set; }
+
+        public string NameExpected { get; set; }
+
         internal string ToSlackMessage()
         {
             return $"\t\t*Name Verified:* {this.NameVerified}, *Email Verified:* {this.EmailVerified?.ToString() ?? "N/A"}";

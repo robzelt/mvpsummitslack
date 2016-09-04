@@ -60,9 +60,10 @@ namespace MVPSummitSlack.Controllers
                     }
                     else
                     {
-                        await SendSlackMessage($":x: Profile validation failed for {model.ToSlackMessage()}\n{profileValidation.ToSlackMessage()}");
-                        Logger.Error($"Profile validation for {model.Email} failed; name didn't match.");
-                        ModelState.AddModelError("", $"Profile validation failed; name didn't match.");
+                        var nameVerificationFailedMessage = $"Profile validation failed for { model.ToSlackMessage()}\n{ profileValidation.ToSlackMessage()}\n\t\t Expected to see `{ profileValidation.NameExpected}` but found `{ profileValidation.NameFound}` instead.";
+                        await SendSlackMessage($":x: {nameVerificationFailedMessage}");
+                        Logger.Error(nameVerificationFailedMessage);
+                        ModelState.AddModelError("ProfileLink", $"The name we found in your MVP profile doesn't match the name you entered.");
                     }
                 }
                 catch (Exception e)
@@ -165,6 +166,8 @@ namespace MVPSummitSlack.Controllers
 
                     // Try to verify that the name matches.
                     var title = divElements.Where(d => d.Attributes["class"].Value.Contains("profile")).SingleOrDefault()?.Descendants("div").FirstOrDefault()?.InnerText.Trim();
+                    validation.NameFound = title;
+                    validation.NameExpected = model.FullName;
                     validation.NameVerified = title.Contains(model.FullName);
                     bool? foundMatchingEmailAddress = null;
 
